@@ -703,14 +703,21 @@ setInterval(tick, 1000); tick();
 /* ---------- Video local + control de música ---------- */
 const bgVideo  = document.getElementById('bgVideo');
 const musicBtn = document.getElementById('musicBtn');
-let muted = true;
+let muted   = true;
+let started = false;   // true tras abrir cortinas por primera vez
 
-// Autoplay muted funciona en todos los navegadores
-bgVideo.play().catch(() => {});
+// Video queda en frame 0 pausado mientras cortinas estan cerradas.
+// Cuando el usuario abre las cortinas se activa play + audio desde el inicio.
+bgVideo.pause();
+bgVideo.currentTime = 0;
 
 function startMusic() {
-  bgVideo.muted = false;
+  bgVideo.muted  = false;
   bgVideo.volume = 0.6;
+  if (!started) {
+    bgVideo.currentTime = 0;   // Empezar desde el principio
+    started = true;
+  }
   bgVideo.play().catch(() => {});
   muted = false;
   musicBtn.classList.remove('muted');

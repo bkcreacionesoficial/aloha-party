@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aloha Party · Fiesta Hawaiana</title>
+<style>
+  :root{
+    --bg:#0a0514;
+    --ink:#f5e9d8;
+    --neon-p:#ff2e93;
+    --neon-t:#00f0ff;
+    --neon-y:#ffe74c;
+    --neon-o:#ff8c42;
+    --kraft:#1a0f2e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:'Georgia',serif;overflow-x:hidden}
+  body.locked{overflow:hidden;height:100vh}
+
+  /* ============ YOUTUBE FONDO ============ */
+  .yt-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .yt-bg iframe{
+    position:absolute;top:50%;left:50%;
+    width:max(100vw,177.78vh);
+    height:max(56.25vw,100vh);
+    transform:translate(-50%,-50%);
+    border:0;
+    filter:brightness(.45) saturate(1.4) hue-rotate(-10deg);
+  }
+  .yt-bg::after{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:
+      radial-gradient(ellipse at 20% 10%,rgba(255,46,147,.28) 0%,transparent 55%),
+      radial-gradient(ellipse at 80% 90%,rgba(0,240,255,.22) 0%,transparent 55%),
+      linear-gradient(180deg,rgba(10,5,20,.55) 0%,rgba(10,5,20,.85) 100%);
+  }
+  /* Flores/palmeras flotantes globales (estilo glass) */
+  .float-emoji{
+    position:fixed;font-size:2.5rem;z-index:3;pointer-events:none;
+    filter:drop-shadow(0 4px 12px rgba(0,0,0,.5));
+    animation:emojiFloat 14s ease-in-out infinite;
+  }
+  @keyframes emojiFloat{
+    0%,100%{transform:translate(0,0) rotate(0deg)}
+    25%{transform:translate(30px,-40px) rotate(15deg)}
+    50%{transform:translate(-20px,-80px) rotate(-10deg)}
+    75%{transform:translate(40px,-60px) rotate(20deg)}
+  }
+  .fe1{top:12%;left:4%}
+  .fe2{top:22%;right:5%;animation-delay:-3s}
+  .fe3{top:55%;left:3%;animation-delay:-6s}
+  .fe4{top:70%;right:4%;animation-delay:-9s}
+  .fe5{top:40%;left:8%;font-size:2rem;animation-delay:-4s}
+  .fe6{top:85%;right:8%;font-size:2rem;animation-delay:-7s}
+  .fe7{top:5%;right:20%;font-size:1.8rem;animation-delay:-2s}
+  .fe8{bottom:10%;left:20%;font-size:1.8rem;animation-delay:-5s}
+  @media (max-width:700px){
+    .fe5,.fe6,.fe7,.fe8{display:none}
+  }
+
+  /* Elementos 3D Fluent (piñas, tragos, palmeras, flores) esparcidos por todo el scroll */
+  .float-3d{
+    position:absolute;pointer-events:none;z-index:3;
+    filter:drop-shadow(0 8px 20px rgba(0,0,0,.5));
+    animation:emoji3d 16s ease-in-out infinite;
+  }
+  .float-3d img{width:100%;height:100%;display:block}
+  @keyframes emoji3d{
+    0%,100%{transform:translate(0,0) rotate(-8deg)}
+    33%{transform:translate(20px,-30px) rotate(8deg)}
+    66%{transform:translate(-25px,-15px) rotate(-4deg)}
+  }
+  /* Contenedor absoluto que cubre toda la altura del main */
+  .deco3d{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+  @media (max-width:700px){
+    .float-3d.hide-sm{display:none}
+    .float-3d{width:60px !important;height:60px !important}
+  }
+
+  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.12;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.5'/></svg>")}
+
+  /* ============ TARJETA BI-FOLD PREMIUM ============ */
+  .envelope-scene{
+    position:fixed;inset:0;z-index:100;
+    display:flex;align-items:center;justify-content:center;
+    perspective:2400px;
+    background:
+      radial-gradient(ellipse at center,rgba(30,15,45,.7) 0%,rgba(5,2,10,.98) 75%);
+    transition:opacity 1s,visibility 1s;
+    padding:20px;
+  }
+  .envelope-scene.gone{opacity:0;visibility:hidden}
+
+  /* Hojas monstera decorativas de fondo */
+  .env-monstera{position:absolute;pointer-events:none;opacity:.25}
+  .env-monstera.m1{top:8%;left:4%;width:min(28vw,260px);transform:rotate(-15deg)}
+  .env-monstera.m2{bottom:8%;right:4%;width:min(28vw,260px);transform:rotate(160deg)}
+  .env-monstera.m3{top:12%;right:7%;width:min(18vw,160px);transform:rotate(30deg);opacity:.15}
+  .env-monstera.m4{bottom:12%;left:7%;width:min(18vw,160px);transform:rotate(-150deg);opacity:.15}
+
+  /* Contenedor tarjeta bi-fold */
+  .envelope{
+    position:relative;
+    width:min(92vw,720px);
+    aspect-ratio:5/6;
+    transform-style:preserve-3d;
+  }
+
+  /* Contenido interior (revelado al abrir) */
+  .env-back{
+    position:absolute;inset:0;
+    background:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23p)' opacity='.12'/></svg>"),
+      radial-gradient(ellipse at center,#fff8e7 0%,#f0e0c0 70%,#d9c299 100%);
+    border-radius:2px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:8% 10%;text-align:center;color:#3a1f0f;
+    box-shadow:
+      0 40px 100px rgba(0,0,0,.8),
+      0 0 60px rgba(212,160,74,.3),
+      inset 0 0 80px rgba(139,69,19,.15);
+    z-index:1;
+    opacity:0;
+    transition:opacity .8s 1s;
+  }
+  .env-back::after{
+    content:'';position:absolute;inset:20px;pointer-events:none;
+    border:1px solid rgba(139,58,58,.35);
+    outline:2px solid rgba(212,160,74,.4);outline-offset:6px;
+  }
+  .envelope.open .env-back{opacity:1}
+
+  /* Contenido tipografico de la tarjeta abierta */
+  .env-back > *{position:relative;z-index:2}
+  .env-back .lbl{
+    font-family:'Georgia',serif;
+    font-size:clamp(.65rem,1.3vw,.8rem);letter-spacing:8px;text-transform:uppercase;
+    color:#8b3a3a;margin-bottom:14px;
+    display:flex;align-items:center;gap:14px;
+  }
+  .env-back .lbl::before,.env-back .lbl::after{
+    content:'';display:inline-block;width:40px;height:1px;background:#8b3a3a;
+  }
+  .env-back .name{
+    font-family:'Brush Script MT','Segoe Script',cursive;
+    font-size:clamp(2.8rem,9vw,5.6rem);
+    color:#8b1a1a;line-height:.95;font-weight:400;
+    text-shadow:1px 1px 0 rgba(139,58,58,.15);
+    margin:6px 0;
+  }
+  .env-back .name .amp{color:#c8a04a;font-size:.75em;vertical-align:middle;padding:0 6px}
+  .env-back .sub{
+    font-family:'Georgia',serif;font-style:italic;
+    font-size:clamp(.9rem,1.9vw,1.15rem);
+    color:#5a2d1a;margin-top:8px;letter-spacing:1px;
+  }
+  .env-back .divider{
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    margin:20px 0 14px;color:#c8a04a;font-size:1rem;
+  }
+  .env-back .divider::before,.env-back .divider::after{
+    content:'';width:80px;height:1px;background:linear-gradient(90deg,transparent,#c8a04a,transparent);
+  }
+  .env-back .date{
+    font-family:'Georgia',serif;font-size:clamp(.85rem,1.5vw,1rem);
+    letter-spacing:5px;text-transform:uppercase;color:#3a1f0f;font-weight:700;
+  }
+
+  /* PUERTAS BI-FOLD (paneles que se abren) */
+  .env-door{
+    position:absolute;top:0;bottom:0;width:50%;
+    background:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/><feColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.05 0 0 0 0 0.15 0 0 0 .35 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
+      linear-gradient(135deg,#3a2050 0%,#1a0f2e 100%);
+    box-shadow:
+      0 40px 100px rgba(0,0,0,.8),
+      0 0 60px rgba(255,46,147,.3),
+      inset 0 0 60px rgba(0,0,0,.5);
+    backface-visibility:hidden;
+    transition:transform 1.6s cubic-bezier(.55,.05,.3,1);
+    z-index:3;
+    cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .env-door.left{
+    left:0;transform-origin:left center;
+    border-radius:4px 0 0 4px;
+  }
+  .env-door.right{
+    right:0;transform-origin:right center;
+    border-radius:0 4px 4px 0;
+  }
+  /* Marco dorado interior en cada puerta */
+  .env-door::before{
+    content:'';position:absolute;inset:20px;
+    border:1px solid rgba(200,160,74,.4);
+    outline:2px solid rgba(200,160,74,.25);outline-offset:6px;
+    pointer-events:none;
+  }
+  /* Sombra vertical en el pliegue central */
+  .env-door.left::after{
+    content:'';position:absolute;top:0;right:0;bottom:0;width:20px;
+    background:linear-gradient(90deg,transparent,rgba(0,0,0,.5));
+    pointer-events:none;
+  }
+  .env-door.right::after{
+    content:'';position:absolute;top:0;left:0;bottom:0;width:20px;
+    background:linear-gradient(-90deg,transparent,rgba(0,0,0,.5));
+    pointer-events:none;
+  }
+
+  /* Contenido tipografico + tiki de las puertas cerradas */
+  .door-content{
+    position:relative;text-align:center;color:#f0e0c0;
+    display:flex;flex-direction:column;align-items:center;gap:12px;
+    width:100%;
+  }
+  .door-content .tiki{
+    width:min(78%,240px);height:auto;
+    filter:drop-shadow(0 10px 20px rgba(0,0,0,.7)) drop-shadow(0 0 20px rgba(255,209,102,.25));
+    margin-bottom:4px;
+  }
+  .door-content .ornament{
+    font-family:'Georgia',serif;font-size:1.4rem;
+    color:#c8a04a;line-height:1;
+  }
+  .door-content .word{
+    font-family:'Brush Script MT','Segoe Script',cursive;
+    font-size:clamp(2.4rem,6.5vw,4rem);color:#f0e0c0;line-height:1;
+    text-shadow:0 2px 8px rgba(0,0,0,.5);
+  }
+  .door-content .mini{
+    font-family:'Georgia',serif;font-style:italic;
+    font-size:clamp(.7rem,1.3vw,.85rem);
+    letter-spacing:4px;text-transform:uppercase;color:#c8a04a;
+  }
+
+  /* Estado abierto: puertas rotan hacia afuera */
+  .envelope.open .env-door.left{transform:rotateY(-165deg)}
+  .envelope.open .env-door.right{transform:rotateY(165deg)}
+
+  /* Hint */
+  .env-hint{
+    position:absolute;bottom:-56px;left:0;right:0;text-align:center;
+    font-family:'Georgia',serif;font-style:italic;
+    font-size:clamp(.85rem,1.6vw,1rem);letter-spacing:4px;text-transform:uppercase;
+    color:#c8a04a;text-shadow:0 0 14px rgba(200,160,74,.6);
+    animation:hintPulse 2.4s ease-in-out infinite;pointer-events:none;
+  }
+  .envelope.open ~ .env-hint{opacity:0;transition:opacity .3s}
+  @keyframes hintPulse{0%,100%{opacity:.5;letter-spacing:4px}50%{opacity:1;letter-spacing:6px}}
+
+  /* Flash blanco al abrir (transición al contenido) */
+  .flash{
+    position:fixed;inset:0;z-index:150;background:#fff;
+    opacity:0;pointer-events:none;
+    transition:opacity .4s;
+  }
+  .flash.on{opacity:.9;transition:opacity .3s}
+
+  /* ============ MUSICA ============ */
+  .music-btn{
+    position:fixed;top:16px;right:16px;z-index:200;
+    width:48px;height:48px;border-radius:50%;
+    background:rgba(10,5,20,.75);backdrop-filter:blur(10px);
+    border:1px solid var(--neon-t);
+    color:var(--neon-t);font-size:1.3rem;cursor:pointer;
+    box-shadow:0 0 24px rgba(0,240,255,.5);
+    transition:transform .2s;
+  }
+  .music-btn:hover{transform:scale(1.1)}
+  .music-btn.muted{border-color:#666;color:#666;box-shadow:none}
+
+  /* ============ CONTENIDO ============ */
+  main{position:relative;z-index:2;opacity:0;transition:opacity 1.4s 1.2s}
+  main.show{opacity:1}
+  section{position:relative;padding:100px 24px}
+  .reveal{opacity:0;transform:translateY(50px);transition:opacity 1s,transform 1s}
+  .reveal.in{opacity:1;transform:none}
+
+  .neon-p{color:var(--neon-p);text-shadow:0 0 10px var(--neon-p),0 0 20px var(--neon-p),0 0 40px rgba(255,46,147,.5)}
+  .neon-t{color:var(--neon-t);text-shadow:0 0 10px var(--neon-t),0 0 20px var(--neon-t),0 0 40px rgba(0,240,255,.5)}
+  .neon-y{color:var(--neon-y);text-shadow:0 0 10px var(--neon-y),0 0 20px var(--neon-y)}
+
+  /* ============ HERO ============ */
+  .hero{min-height:100vh;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px 24px}
+  .hero .tag{
+    display:inline-block;padding:10px 22px;
+    border:1px solid var(--neon-p);border-radius:100px;
+    font-size:.75rem;letter-spacing:4px;text-transform:uppercase;
+    color:var(--neon-p);text-shadow:0 0 8px var(--neon-p);
+    box-shadow:0 0 20px rgba(255,46,147,.4),inset 0 0 20px rgba(255,46,147,.1);
+    margin-bottom:30px;
+  }
+  .hero h1{
+    font-family:'Georgia',serif;font-style:italic;
+    font-size:clamp(4.5rem,17vw,12rem);line-height:.88;
+    background:linear-gradient(180deg,var(--neon-y) 0%,var(--neon-o) 50%,var(--neon-p) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 0 30px rgba(255,140,66,.5));
+    letter-spacing:-3px;
+  }
+  .hero .sub{font-family:'Brush Script MT',cursive;font-size:clamp(1.8rem,4.5vw,2.8rem);margin-top:16px}
+  .hero .lead{max-width:520px;margin:24px auto 0;font-size:1.05rem;line-height:1.7;opacity:.9}
+  .hero .scroll{position:absolute;bottom:30px;left:0;right:0;text-align:center;font-size:.75rem;letter-spacing:4px;text-transform:uppercase;opacity:.7;animation:down 2s ease-in-out infinite}
+  @keyframes down{0%,100%{transform:translateY(0);opacity:.7}50%{transform:translateY(10px);opacity:1}}
+
+  /* Palmera silueta abajo hero */
+  .palm-bottom{
+    position:absolute;bottom:0;left:0;right:0;pointer-events:none;
+    height:min(38vh,320px);
+    background:no-repeat center bottom / cover
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='xMidYMax slice'><g fill='%23000'><path d='M100,320 L120,180 C118,160 122,145 130,140 C110,135 95,120 90,100 C110,110 125,115 138,118 C120,100 115,80 118,60 C130,80 142,95 148,110 C150,90 158,72 172,60 C170,80 168,100 172,120 C185,100 200,90 220,85 C205,105 195,120 190,135 C210,130 225,132 240,140 C220,145 200,155 190,170 C195,190 200,220 200,320 Z'/><path d='M1340,320 L1320,190 C1322,170 1318,155 1310,148 C1330,145 1345,128 1352,108 C1332,118 1315,122 1302,124 C1320,105 1328,85 1325,65 C1310,85 1298,102 1290,116 C1288,95 1280,78 1266,65 C1268,85 1272,105 1268,124 C1252,105 1235,95 1215,90 C1232,110 1244,125 1250,140 C1230,135 1215,138 1200,146 C1220,150 1240,160 1250,175 C1245,195 1240,225 1240,320 Z'/></g></svg>");
+    filter:drop-shadow(0 -10px 20px rgba(0,0,0,.5));
+  }
+
+  /* Flores flotantes esparcidas */
+  .hibiscus{
+    position:absolute;pointer-events:none;
+    animation:flow 12s ease-in-out infinite;
+    filter:drop-shadow(0 4px 12px rgba(0,0,0,.4));
+  }
+  @keyframes flow{
+    0%,100%{transform:translate(0,0) rotate(0)}
+    25%{transform:translate(20px,-30px) rotate(15deg)}
+    50%{transform:translate(-15px,-60px) rotate(-10deg)}
+    75%{transform:translate(25px,-40px) rotate(20deg)}
+  }
+  .hibiscus.h1{top:8%;left:5%;width:70px;animation-delay:0s}
+  .hibiscus.h2{top:15%;right:6%;width:60px;animation-delay:-3s}
+  .hibiscus.h3{top:55%;left:4%;width:80px;animation-delay:-6s}
+  .hibiscus.h4{top:65%;right:5%;width:55px;animation-delay:-9s}
+
+  /* Palmera lateral secciones */
+  .side-palm{position:absolute;top:0;bottom:0;width:180px;opacity:.25;pointer-events:none;background:no-repeat center / contain}
+  .side-palm.left{left:-40px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 400'><path fill='%232a5a3e' d='M100,400 L108,220 C106,200 110,180 118,175 C95,168 78,150 72,125 C95,138 112,143 128,146 C108,125 100,105 105,80 C120,105 135,122 145,140 C148,115 158,90 175,75 C172,105 168,132 174,155 C190,130 208,118 232,110 C215,135 202,155 195,175 C218,165 236,168 255,178 C230,185 208,198 195,215 C202,235 208,270 208,400 Z' transform='translate(-50,0)'/></svg>")}
+  .side-palm.right{right:-40px;transform:scaleX(-1);background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 400'><path fill='%232a5a3e' d='M100,400 L108,220 C106,200 110,180 118,175 C95,168 78,150 72,125 C95,138 112,143 128,146 C108,125 100,105 105,80 C120,105 135,122 145,140 C148,115 158,90 175,75 C172,105 168,132 174,155 C190,130 208,118 232,110 C215,135 202,155 195,175 C218,165 236,168 255,178 C230,185 208,198 195,215 C202,235 208,270 208,400 Z' transform='translate(-50,0)'/></svg>")}
+
+  /* Hoja monstera decorativa dentro paper */
+  .monstera{position:absolute;width:180px;opacity:.5;pointer-events:none}
+  .monstera.tl{top:-40px;left:-60px;transform:rotate(-25deg)}
+  .monstera.br{bottom:-40px;right:-60px;transform:rotate(155deg)}
+
+  /* ============ SECCION DETALLES + COUNTDOWN ============ */
+  .grid-2{
+    display:grid;grid-template-columns:1fr 1fr;gap:40px;
+    max-width:1100px;margin:0 auto;align-items:center;
+  }
+  @media (max-width:820px){.grid-2{grid-template-columns:1fr}}
+  .section-title{
+    text-align:center;font-family:'Brush Script MT',cursive;
+    font-size:clamp(2.4rem,6vw,4rem);margin-bottom:16px;
+  }
+  .section-lead{
+    text-align:center;max-width:640px;margin:0 auto 50px;
+    font-size:1.05rem;line-height:1.7;opacity:.9;
+  }
+
+  .paper{
+    width:100%;position:relative;
+    background:linear-gradient(180deg,rgba(245,233,216,.98) 0%,rgba(230,215,190,.95) 100%);
+    color:var(--kraft);
+    padding:50px 40px;border-radius:4px;
+    box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(255,46,147,.2),inset 0 0 100px rgba(139,69,19,.1);
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.15'/></svg>"),linear-gradient(180deg,rgba(245,233,216,.98) 0%,rgba(230,215,190,.95) 100%);
+  }
+  .paper::before,.paper::after{content:'';position:absolute;left:0;right:0;height:12px;background:repeating-linear-gradient(90deg,transparent 0,transparent 8px,rgba(0,0,0,.15) 8px,rgba(0,0,0,.15) 10px)}
+  .paper::before{top:-6px}.paper::after{bottom:-6px}
+  .paper h2{font-family:'Brush Script MT',cursive;font-size:2.4rem;text-align:center;color:#8b3a3a;margin-bottom:6px}
+  .paper .ornament{text-align:center;color:#8b3a3a;font-size:1.5rem;letter-spacing:12px;margin-bottom:24px}
+  .paper .detail{display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-bottom:1px dashed rgba(0,0,0,.2)}
+  .paper .detail:last-child{border:0}
+  .paper .detail .lbl{flex:0 0 90px;font-family:'Brush Script MT',cursive;font-size:1.3rem;color:#8b3a3a}
+  .paper .detail .val{flex:1;font-size:1rem;line-height:1.5;padding-top:4px}
+
+  .countdown-wrap{text-align:center}
+  .countdown-wrap h3{font-family:'Brush Script MT',cursive;font-size:2rem;margin-bottom:24px}
+  .cd-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .cd-unit{background:rgba(10,5,20,.65);border:1px solid var(--neon-t);border-radius:14px;padding:22px 6px;box-shadow:0 0 30px rgba(0,240,255,.3),inset 0 0 20px rgba(0,240,255,.1);backdrop-filter:blur(10px)}
+  .cd-unit b{display:block;font-size:clamp(1.8rem,5vw,3rem);font-weight:400;color:var(--neon-t);text-shadow:0 0 15px var(--neon-t);font-family:'Georgia',serif;line-height:1}
+  .cd-unit span{font-size:.7rem;letter-spacing:3px;text-transform:uppercase;opacity:.7;margin-top:8px;display:block}
+  .cd-caption{margin-top:22px;font-size:.95rem;opacity:.85;line-height:1.6;max-width:360px;margin-left:auto;margin-right:auto}
+
+  /* ============ SECCION MAPA + RSVP ============ */
+  .map-frame{
+    position:relative;border-radius:16px;overflow:hidden;
+    border:1px solid var(--neon-t);
+    box-shadow:0 0 40px rgba(0,240,255,.35),0 20px 60px rgba(0,0,0,.5);
+    aspect-ratio:16/11;width:100%;
+  }
+  .map-frame iframe{width:100%;height:100%;border:0;filter:invert(.9) hue-rotate(180deg) saturate(.7)}
+  .map-info{margin-top:16px;padding:16px;background:rgba(10,5,20,.6);border:1px solid rgba(255,255,255,.1);border-radius:12px;font-size:.9rem;line-height:1.6;opacity:.9}
+  .map-info strong{color:var(--neon-y)}
+
+  .rsvp-wrap{width:100%}
+  .rsvp{
+    background:rgba(10,5,20,.7);backdrop-filter:blur(14px);
+    border:1px solid rgba(255,46,147,.4);border-radius:20px;
+    padding:32px;
+    box-shadow:0 0 40px rgba(255,46,147,.25);
+  }
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--neon-t);margin-bottom:6px}
+  .field input,.field textarea,.field select{
+    width:100%;padding:12px 14px;
+    background:rgba(255,255,255,.05);color:var(--ink);
+    border:1px solid rgba(255,255,255,.15);border-radius:10px;
+    font-family:inherit;font-size:1rem;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{
+    outline:0;border-color:var(--neon-p);box-shadow:0 0 0 3px rgba(255,46,147,.2)
+  }
+  .field textarea{resize:vertical;min-height:80px}
+  .field select{cursor:pointer}
+  .field select option{background:#1a0f2e;color:var(--ink)}
+  .row{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+  .submit{
+    width:100%;padding:14px;margin-top:8px;cursor:pointer;
+    background:linear-gradient(135deg,var(--neon-p) 0%,var(--neon-o) 100%);
+    color:#fff;font-weight:700;font-size:1rem;letter-spacing:2px;text-transform:uppercase;
+    border:0;border-radius:10px;
+    box-shadow:0 0 30px rgba(255,46,147,.5);
+    transition:transform .15s,filter .15s;
+  }
+  .submit:hover{transform:translateY(-2px);filter:brightness(1.15)}
+  .submit:disabled{opacity:.5;cursor:wait}
+  .msg{margin-top:14px;padding:12px;border-radius:10px;text-align:center;font-size:.9rem;display:none}
+  .msg.ok{display:block;background:rgba(0,240,255,.15);border:1px solid var(--neon-t);color:var(--neon-t)}
+  .msg.err{display:block;background:rgba(255,46,147,.15);border:1px solid var(--neon-p);color:var(--neon-p)}
+
+  /* ============ OUTRO ============ */
+  .outro{text-align:center;max-width:640px;margin:0 auto;padding:40px 20px 100px}
+  .outro .big{font-family:'Brush Script MT',cursive;font-size:clamp(3.5rem,12vw,7rem);line-height:1;margin-bottom:24px}
+  .outro p{font-size:1.1rem;line-height:1.8;opacity:.9;margin-bottom:16px}
+  .outro .heart{font-size:1.4rem;letter-spacing:8px;margin-top:20px;color:var(--neon-p)}
+
+  .back{position:fixed;top:16px;left:16px;z-index:200;color:var(--ink);text-decoration:none;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);padding:8px 14px;border-radius:100px;font-size:.8rem;border:1px solid rgba(255,255,255,.2)}
+
+  @media (max-width:520px){
+    .row{grid-template-columns:1fr}
+    .paper{padding:36px 24px}
+    .paper .detail{flex-direction:column;gap:4px}
+    .paper .detail .lbl{flex:none}
+    section{padding:70px 20px}
+  }
+</style>
+</head>
+<body class="locked">
+
+<div class="yt-bg"><div id="ytPlayer"></div></div>
+<div class="grain"></div>
+
+<a class="back" href="index.html">← Volver</a>
+<button class="music-btn muted" id="musicBtn" title="Música">🔇</button>
+
+<!-- Flores y palmeras flotantes globales -->
+<div class="float-emoji fe1">🌺</div>
+<div class="float-emoji fe2">🌸</div>
+<div class="float-emoji fe3">🌺</div>
+<div class="float-emoji fe4">🌴</div>
+<div class="float-emoji fe5">🌴</div>
+<div class="float-emoji fe6">🌺</div>
+<div class="float-emoji fe7">🍹</div>
+<div class="float-emoji fe8">🌸</div>
+
+<div class="flash" id="flash"></div>
+
+<!-- TARJETA BI-FOLD PREMIUM -->
+<div class="envelope-scene" id="envScene">
+
+  <!-- Hojas monstera decorativas de fondo -->
+  <svg class="env-monstera m1" viewBox="0 0 200 200"><path fill="#1a4d2e" d="M100,15 C50,35 15,85 20,145 C24,175 55,192 92,182 C122,174 133,150 135,118 C142,75 132,42 100,15 Z M100,40 C112,88 106,140 90,162 M55,88 C78,102 100,112 116,135 M45,120 C74,128 96,132 110,152"/></svg>
+  <svg class="env-monstera m2" viewBox="0 0 200 200"><path fill="#1a4d2e" d="M100,15 C50,35 15,85 20,145 C24,175 55,192 92,182 C122,174 133,150 135,118 C142,75 132,42 100,15 Z M100,40 C112,88 106,140 90,162 M55,88 C78,102 100,112 116,135 M45,120 C74,128 96,132 110,152"/></svg>
+  <svg class="env-monstera m3" viewBox="0 0 200 200"><path fill="#1a4d2e" d="M100,15 C50,35 15,85 20,145 C24,175 55,192 92,182 C122,174 133,150 135,118 C142,75 132,42 100,15 Z"/></svg>
+  <svg class="env-monstera m4" viewBox="0 0 200 200"><path fill="#1a4d2e" d="M100,15 C50,35 15,85 20,145 C24,175 55,192 92,182 C122,174 133,150 135,118 C142,75 132,42 100,15 Z"/></svg>
+
+  <div class="envelope" id="env">
+    <!-- Contenido revelado detras cuando las puertas se abren -->
+    <div class="env-back">
+      <div class="lbl">Invitación</div>
+      <div class="name">Aloha<span class="amp">·</span>Party</div>
+      <div class="sub">Una tarde de sol, mar y música tropical</div>
+      <div class="divider">✦</div>
+      <div class="date">27 · Sep · 2026</div>
+    </div>
+
+    <!-- Puertas bi-fold (izquierda y derecha) -->
+    <div class="env-door left" id="doorL">
+      <div class="door-content">
+        <img class="tiki" alt="tiki" src="assets/tiki.png">
+        <div class="ornament">✦</div>
+        <div class="word">Alo</div>
+        <div class="mini">Estás</div>
+      </div>
+    </div>
+    <div class="env-door right" id="doorR">
+      <div class="door-content">
+        <img class="tiki" alt="tiki" src="assets/tiki.png">
+        <div class="ornament">✦</div>
+        <div class="word">ha</div>
+        <div class="mini">Invitado</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="env-hint">Toca para abrir</div>
+</div>
+
+<main id="main">
+
+  <!-- 3D Fluent emojis flotando por todo el body (piñas, tragos, palmeras, flores) -->
+  <div class="deco3d">
+    <div class="float-3d" style="top:3%;left:6%;width:90px;height:90px;animation-delay:0s">
+      <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Palm%20tree/3D/palm_tree_3d.png" alt="">
+    </div>
+    <div class="float-3d hide-sm" style="top:8%;right:10%;width:80px;height:80px;animation-delay:-2s">
+      <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Pineapple/3D/pineapple_3d.png" alt="">
+    </div>
+    <div class="float-3d" style="top:18%;right:4%;width:95px;height:95px;animation-delay:-4s">
+      <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Tropical%20drink/3D/tropical_drink_3d.png" alt="">
+    </div>
+    <div class="float-3d hide-sm" style="top:22%;left:12%;width:70px;height:70px;animation-delay:-6s">
+      <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Hibiscus/3D/hibiscus_3d.png" alt="">
+    </div>
+    <div class="float-3d" style="top:32%;left:5%;width:85px;height:85px;animation-delay:-1s">
+      <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Pineapple/3D/pineapple_3d.png" alt="">
+    </div>
+    <div class="float-3d hide-sm" style="top:38%;right:8%;width:75px;height:75px;animation-delay:-3s">
+      <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Palm%20tree/3D/palm_tree_3d.png" alt="">
+    </div>
+    <div class="float-3d" style="top:45%;right:5%;width:90px;height:90px;animation-delay:-5s">
+      <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Hibiscus/3D/hibiscus_3d.png" alt="">
+    </div>
+    <div class="float-3d hide-sm" style="top:52%;left:3%;width:80px;height:80px;animation-delay:-7s">
+      <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Tropical%20drink/3D/tropical_drink_3d.png" alt="">
+    </div>
+    <div class="float-3d" style="top:60%;left:7%;width:85px;height:85px;animation-delay:-2s">
+      <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Palm%20tree/3D/palm_tree_3d.png" alt="">
+    </div>
+    <div class="float-3d hide-sm" style="top:66%;right:6%;width:70px;height:70px;animation-delay:-4s">
+      <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Pineapple/3D/pineapple_3d.png" alt="">
+    </div>
+    <div class="float-3d" style="top:74%;right:4%;width:90px;height:90px;animation-delay:-6s">
+      <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Hibiscus/3D/hibiscus_3d.png" alt="">
+    </div>
+    <div class="float-3d hide-sm" style="top:80%;left:10%;width:75px;height:75px;animation-delay:-1s">
+      <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Tropical%20drink/3D/tropical_drink_3d.png" alt="">
+    </div>
+    <div class="float-3d" style="top:88%;left:4%;width:85px;height:85px;animation-delay:-3s">
+      <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Pineapple/3D/pineapple_3d.png" alt="">
+    </div>
+    <div class="float-3d hide-sm" style="top:94%;right:8%;width:80px;height:80px;animation-delay:-5s">
+      <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Palm%20tree/3D/palm_tree_3d.png" alt="">
+    </div>
+  </div>
+
+  <!-- SECCION 1: HERO -->
+  <section class="hero">
+    <!-- flores flotantes SVG -->
+    <svg class="hibiscus h1" viewBox="0 0 100 100"><g><circle cx="50" cy="50" r="10" fill="#ffe74c"/><ellipse cx="50" cy="25" rx="15" ry="22" fill="#ff2e93"/><ellipse cx="70" cy="40" rx="15" ry="22" fill="#ff2e93" transform="rotate(72 70 40)"/><ellipse cx="65" cy="70" rx="15" ry="22" fill="#ff2e93" transform="rotate(144 65 70)"/><ellipse cx="35" cy="70" rx="15" ry="22" fill="#ff2e93" transform="rotate(216 35 70)"/><ellipse cx="30" cy="40" rx="15" ry="22" fill="#ff2e93" transform="rotate(288 30 40)"/></g></svg>
+    <svg class="hibiscus h2" viewBox="0 0 100 100"><g><circle cx="50" cy="50" r="10" fill="#ffe74c"/><ellipse cx="50" cy="25" rx="15" ry="22" fill="#ff8c42"/><ellipse cx="70" cy="40" rx="15" ry="22" fill="#ff8c42" transform="rotate(72 70 40)"/><ellipse cx="65" cy="70" rx="15" ry="22" fill="#ff8c42" transform="rotate(144 65 70)"/><ellipse cx="35" cy="70" rx="15" ry="22" fill="#ff8c42" transform="rotate(216 35 70)"/><ellipse cx="30" cy="40" rx="15" ry="22" fill="#ff8c42" transform="rotate(288 30 40)"/></g></svg>
+    <svg class="hibiscus h3" viewBox="0 0 100 100"><g><circle cx="50" cy="50" r="10" fill="#ffe74c"/><ellipse cx="50" cy="25" rx="15" ry="22" fill="#00f0ff"/><ellipse cx="70" cy="40" rx="15" ry="22" fill="#00f0ff" transform="rotate(72 70 40)"/><ellipse cx="65" cy="70" rx="15" ry="22" fill="#00f0ff" transform="rotate(144 65 70)"/><ellipse cx="35" cy="70" rx="15" ry="22" fill="#00f0ff" transform="rotate(216 35 70)"/><ellipse cx="30" cy="40" rx="15" ry="22" fill="#00f0ff" transform="rotate(288 30 40)"/></g></svg>
+    <svg class="hibiscus h4" viewBox="0 0 100 100"><g><circle cx="50" cy="50" r="10" fill="#ffe74c"/><ellipse cx="50" cy="25" rx="15" ry="22" fill="#ffe74c"/><ellipse cx="70" cy="40" rx="15" ry="22" fill="#ffe74c" transform="rotate(72 70 40)"/><ellipse cx="65" cy="70" rx="15" ry="22" fill="#ffe74c" transform="rotate(144 65 70)"/><ellipse cx="35" cy="70" rx="15" ry="22" fill="#ffe74c" transform="rotate(216 35 70)"/><ellipse cx="30" cy="40" rx="15" ry="22" fill="#ffe74c" transform="rotate(288 30 40)"/></g></svg>
+
+    <span class="tag">Estás cordialmente invitado</span>
+    <h1>Aloha<br>Party</h1>
+    <div class="sub neon-t">Fiesta Hawaiana · Verano 2026</div>
+    <div class="scroll">Desliza para descubrir ↓</div>
+    <div class="palm-bottom"></div>
+  </section>
+
+  <!-- SECCION 2: DETALLES + COUNTDOWN -->
+  <section>
+    <div class="side-palm left"></div>
+    <div class="side-palm right"></div>
+    <h2 class="section-title neon-p reveal">Los Detalles</h2>
+    <p class="section-lead reveal">Todo lo que necesitas saber para que solo te preocupes por elegir la mejor camisa floreada de tu clóset.</p>
+    <div class="grid-2">
+      <div class="paper reveal">
+        <svg class="monstera tl" viewBox="0 0 200 200"><path fill="#1a4d2e" d="M100,20 C50,40 20,90 25,150 C28,175 55,190 90,180 C120,172 130,150 132,120 C138,80 130,45 100,20 Z M100,45 C110,90 105,140 92,165 M55,90 C78,102 100,110 115,132 M45,120 C72,128 95,132 108,150"/></svg>
+        <h2>La cita</h2>
+        <div class="ornament">✦ ✦ ✦</div>
+        <div class="detail"><div class="lbl">Cuándo</div><div class="val"><b>Domingo 27 de Septiembre, 2026</b><br>A partir de la 1:00 PM</div></div>
+        <div class="detail"><div class="lbl">Dónde</div><div class="val"><b>Lázaro Cárdenas 102</b><br>San Pablo Autopan, 50294<br>Estado de México<br><a href="https://maps.app.goo.gl/azsRTkvBYEwvbaDU8" target="_blank" rel="noopener" style="color:#8b3a3a;text-decoration:underline">Ver en Google Maps</a></div></div>
+        <div class="detail"><div class="lbl">Vestir</div><div class="val">Temática hawaiana opcional.<br><i>Camisas floreadas, leis y sombreros bienvenidos.</i></div></div>
+      </div>
+      <div class="countdown-wrap reveal">
+        <h3 class="neon-p">Cuenta regresiva</h3>
+        <div class="cd-grid">
+          <div class="cd-unit"><b id="d">0</b><span>Días</span></div>
+          <div class="cd-unit"><b id="h">0</b><span>Horas</span></div>
+          <div class="cd-unit"><b id="m">0</b><span>Min</span></div>
+          <div class="cd-unit"><b id="s">0</b><span>Seg</span></div>
+        </div>
+        <p class="cd-caption">Cada segundo que pasa te acerca más al atardecer, a la música y a esa foto que todos van a querer subir.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCION 3: MAPA + RSVP -->
+  <section>
+    <h2 class="section-title neon-y reveal">Cómo llegar & confirma</h2>
+    <p class="section-lead reveal">Ubícate en el mapa y déjanos saber si te sumas. Con tu confirmación preparamos leis, sillas y tragos suficientes.</p>
+    <div class="grid-2">
+      <div class="reveal">
+        <div class="map-frame">
+          <iframe loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"
+            src="https://www.google.com/maps?q=Lazaro+Cardenas+102,+San+Pablo+Autopan,+50294,+Estado+de+Mexico&output=embed"></iframe>
+        </div>
+      </div>
+      <div class="rsvp-wrap reveal">
+        <form class="rsvp" id="rsvpForm" autocomplete="off">
+          <div class="field">
+            <label for="nombre">Tu nombre</label>
+            <input id="nombre" name="nombre" type="text" required minlength="2" maxlength="150" placeholder="Escribe tu nombre completo">
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="confirmacion">¿Vienes?</label>
+              <select id="confirmacion" name="confirmacion" required>
+                <option value="SI">Sí, ahí estaré 🌴</option>
+                <option value="TALVEZ">Tal vez</option>
+                <option value="NO">No podré 😢</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="acompanantes">Acompañantes</label>
+              <input id="acompanantes" name="acompanantes" type="number" min="0" max="9" value="0">
+            </div>
+          </div>
+          <div class="field">
+            <label for="mensaje">Mensaje (opcional)</label>
+            <textarea id="mensaje" name="mensaje" maxlength="500" placeholder="Restricciones alimenticias, saludo, canción que quieres oír..."></textarea>
+          </div>
+          <button type="submit" class="submit" id="waBtn" style="background:linear-gradient(135deg,#25D366,#128C7E);box-shadow:0 0 30px rgba(37,211,102,.5)">📱 Confirmar por WhatsApp</button>
+          <div class="msg" id="msg"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCION 4: OUTRO -->
+  <section>
+    <div class="outro reveal">
+      <div class="big neon-y">Mahalo</div>
+      <p>Nos vemos bajo las palmeras, con el sol brillando y la música tropical al máximo.</p>
+      <p>Va a ser un día inolvidable. Y tú eres parte esencial.</p>
+      <div class="heart">✦ 🌺 ✦</div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ---------- Sobre: abrir con efecto zoom ---------- */
+const env    = document.getElementById('env');
+const scene  = document.getElementById('envScene');
+const main   = document.getElementById('main');
+const flash  = document.getElementById('flash');
+let opened   = false;
+
+function openCard(){
+  if (opened) return;
+  opened = true;
+  env.classList.add('open');
+  startMusic();
+  // Fade suave despues de que las puertas terminan de abrirse (1.6s)
+  setTimeout(() => {
+    scene.classList.add('gone');
+    document.body.classList.remove('locked');
+    main.classList.add('show');
+  }, 2400);
+}
+// Click sobre las puertas o el contenedor
+document.getElementById('doorL').addEventListener('click', openCard);
+document.getElementById('doorR').addEventListener('click', openCard);
+env.addEventListener('click', openCard);
+
+/* ---------- Scroll reveal ---------- */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: .15 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ---------- Countdown ---------- */
+const target = new Date('2026-09-27T13:00:00').getTime();
+function tick() {
+  const diff = Math.max(0, target - Date.now());
+  document.getElementById('d').textContent = Math.floor(diff / 86400000);
+  document.getElementById('h').textContent = Math.floor(diff % 86400000 / 3600000);
+  document.getElementById('m').textContent = Math.floor(diff % 3600000 / 60000);
+  document.getElementById('s').textContent = Math.floor(diff % 60000 / 1000);
+}
+setInterval(tick, 1000); tick();
+
+/* ---------- YouTube API ---------- */
+let ytPlayer = null;
+let ytReady  = false;
+const YT_ID  = 'oXFmBTClGaE';
+
+const tag = document.createElement('script');
+tag.src = 'https://www.youtube.com/iframe_api';
+document.head.appendChild(tag);
+
+window.onYouTubeIframeAPIReady = function () {
+  ytPlayer = new YT.Player('ytPlayer', {
+    videoId: YT_ID,
+    playerVars: {
+      autoplay: 1, mute: 1, controls: 0, loop: 1,
+      playlist: YT_ID, modestbranding: 1, rel: 0, playsinline: 1, iv_load_policy: 3
+    },
+    events: {
+      onReady: () => { ytReady = true; ytPlayer.playVideo(); },
+      onStateChange: e => { if (e.data === YT.PlayerState.ENDED) ytPlayer.playVideo(); }
+    }
+  });
+};
+
+/* ---------- Música ---------- */
+const musicBtn = document.getElementById('musicBtn');
+let muted = true;
+function startMusic() {
+  if (!ytReady || !ytPlayer) {
+    const iv = setInterval(() => { if (ytReady && ytPlayer) { clearInterval(iv); doUnmute(); } }, 200);
+    return;
+  }
+  doUnmute();
+}
+function doUnmute() {
+  try { ytPlayer.unMute(); ytPlayer.setVolume(60); ytPlayer.playVideo(); } catch(e){}
+  muted = false;
+  musicBtn.classList.remove('muted');
+  musicBtn.textContent = '🔊';
+}
+function doMute() {
+  try { ytPlayer.mute(); } catch(e){}
+  muted = true;
+  musicBtn.classList.add('muted');
+  musicBtn.textContent = '🔇';
+}
+musicBtn.addEventListener('click', () => { muted ? doUnmute() : doMute(); });
+
+/* ---------- RSVP via WhatsApp (sin backend, GH Pages friendly) ----------
+ * Al enviar el formulario abre wa.me con mensaje prellenado.
+ * -------------------------------------------------------------- */
+const WA_NUMBER = '527121803265'; // Codigo pais 52 + numero, sin + ni espacios
+
+const form = document.getElementById('rsvpForm');
+const msg  = document.getElementById('msg');
+
+form.addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  msg.className = 'msg'; msg.textContent = '';
+
+  const nombre       = document.getElementById('nombre').value.trim();
+  const confirmacion = document.getElementById('confirmacion').value;
+  const acompanantes = parseInt(document.getElementById('acompanantes').value || '0', 10);
+  const mensaje      = document.getElementById('mensaje').value.trim();
+
+  if (nombre.length < 2) {
+    msg.className = 'msg err';
+    msg.textContent = 'Ingresa tu nombre (mínimo 2 caracteres).';
+    return;
+  }
+
+  // Emojis definidos con escapes Unicode para no depender del charset del server.
+  // \u{XXXX} es JS puro y produce el emoji correcto sin importar como se sirva el archivo.
+  const E = {
+    user:  '\u{1F464}',  // 👤
+    cal:   '\u{1F4C5}',  // 📅
+    group: '\u{1F465}',  // 👥
+    chat:  '\u{1F4AC}',  // 💬
+    ok:    '\u{2705}',   // ✅
+    no:    '\u{274C}',   // ❌
+    maybe: '\u{1F914}'   // 🤔
+  };
+  const map = {
+    SI:     E.ok    + ' Si voy',
+    NO:     E.no    + ' No podre',
+    TALVEZ: E.maybe + ' Tal vez'
+  };
+  const raw =
+    '*ALOHA PARTY - Confirmacion*\n' +
+    '---------------------------\n' +
+    E.user  + ' Nombre: '       + nombre.toUpperCase() + '\n' +
+    E.cal   + ' Respuesta: '    + map[confirmacion]    + '\n' +
+    E.group + ' Acompanantes: ' + acompanantes         + '\n' +
+    (mensaje ? E.chat + ' Mensaje: ' + mensaje.toUpperCase() + '\n' : '');
+
+  // api.whatsapp.com maneja mejor emojis en WA Web/Desktop que wa.me
+  const url = 'https://api.whatsapp.com/send?phone=' + WA_NUMBER +
+              '&text=' + encodeURIComponent(raw);
+  window.open(url, '_blank');
+  msg.className = 'msg ok';
+  msg.textContent = 'Abriendo WhatsApp… envía el mensaje para confirmar 🌺';
+});
+</script>
+</body>
+</html>

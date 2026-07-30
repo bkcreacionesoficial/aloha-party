@@ -18,14 +18,14 @@
   html,body{background:var(--bg);color:var(--ink);font-family:'Georgia',serif;overflow-x:hidden}
   body.locked{overflow:hidden;height:100vh}
 
-  /* ============ YOUTUBE FONDO ============ */
+  /* ============ VIDEO FONDO LOCAL ============ */
   .yt-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-  .yt-bg iframe{
+  .yt-bg video{
     position:absolute;top:50%;left:50%;
     width:max(100vw,177.78vh);
     height:max(56.25vw,100vh);
     transform:translate(-50%,-50%);
-    border:0;
+    object-fit:cover;
     filter:brightness(.45) saturate(1.4) hue-rotate(-10deg);
   }
   .yt-bg::after{
@@ -451,10 +451,13 @@
 </head>
 <body class="locked">
 
-<div class="yt-bg"><div id="ytPlayer"></div></div>
+<div class="yt-bg">
+  <video id="bgVideo" autoplay muted loop playsinline preload="auto">
+    <source src="assets/Over the Rainbow.mp4" type="video/mp4">
+  </video>
+</div>
 <div class="grain"></div>
 
-<a class="back" href="index.html">← Volver</a>
 <button class="music-btn muted" id="musicBtn" title="Música">🔇</button>
 
 <!-- Flores y palmeras flotantes globales -->
@@ -697,52 +700,29 @@ function tick() {
 }
 setInterval(tick, 1000); tick();
 
-/* ---------- YouTube API ---------- */
-let ytPlayer = null;
-let ytReady  = false;
-const YT_ID  = 'oXFmBTClGaE';
-
-const tag = document.createElement('script');
-tag.src = 'https://www.youtube.com/iframe_api';
-document.head.appendChild(tag);
-
-window.onYouTubeIframeAPIReady = function () {
-  ytPlayer = new YT.Player('ytPlayer', {
-    videoId: YT_ID,
-    playerVars: {
-      autoplay: 1, mute: 1, controls: 0, loop: 1,
-      playlist: YT_ID, modestbranding: 1, rel: 0, playsinline: 1, iv_load_policy: 3
-    },
-    events: {
-      onReady: () => { ytReady = true; ytPlayer.playVideo(); },
-      onStateChange: e => { if (e.data === YT.PlayerState.ENDED) ytPlayer.playVideo(); }
-    }
-  });
-};
-
-/* ---------- Música ---------- */
+/* ---------- Video local + control de música ---------- */
+const bgVideo  = document.getElementById('bgVideo');
 const musicBtn = document.getElementById('musicBtn');
 let muted = true;
+
+// Autoplay muted funciona en todos los navegadores
+bgVideo.play().catch(() => {});
+
 function startMusic() {
-  if (!ytReady || !ytPlayer) {
-    const iv = setInterval(() => { if (ytReady && ytPlayer) { clearInterval(iv); doUnmute(); } }, 200);
-    return;
-  }
-  doUnmute();
-}
-function doUnmute() {
-  try { ytPlayer.unMute(); ytPlayer.setVolume(60); ytPlayer.playVideo(); } catch(e){}
+  bgVideo.muted = false;
+  bgVideo.volume = 0.6;
+  bgVideo.play().catch(() => {});
   muted = false;
   musicBtn.classList.remove('muted');
   musicBtn.textContent = '🔊';
 }
-function doMute() {
-  try { ytPlayer.mute(); } catch(e){}
+function stopMusic() {
+  bgVideo.muted = true;
   muted = true;
   musicBtn.classList.add('muted');
   musicBtn.textContent = '🔇';
 }
-musicBtn.addEventListener('click', () => { muted ? doUnmute() : doMute(); });
+musicBtn.addEventListener('click', () => { muted ? startMusic() : stopMusic(); });
 
 /* ---------- RSVP via WhatsApp (sin backend, GH Pages friendly) ----------
  * Al enviar el formulario abre wa.me con mensaje prellenado.
